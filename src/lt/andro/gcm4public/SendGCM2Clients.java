@@ -9,9 +9,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.android.gcm.server.Constants;
 import com.google.android.gcm.server.Message;
 import com.google.android.gcm.server.MulticastResult;
+import com.google.android.gcm.server.Notification;
 import com.google.android.gcm.server.Sender;
+import com.google.android.gcm.server.Message.Priority;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -69,8 +72,29 @@ public class SendGCM2Clients extends HttpServlet {
     private MulticastResult sendMessageToDevice(String apiKey, List<String> devices, String title,
             String message, String url) {
         Sender sender = new Sender(apiKey);
-        Message gcmMessage = new Message.Builder().addData("title", title)
-                .addData("message", message).addData("url", url).build();
+        /*
+        String data = "{" + 
+        "\"alert\" : \"You got your emails.\"," +
+        "\"badge\" : 9," +
+        "\"sound\" : \"default\" }," +
+        //"\"sound\" : \"default\", " +
+        //"\"content-available\" : 1 " +
+        //" }," +
+        "\"acme1\" : \"bar\"," +
+        "\"acme2\" : 42 " +
+        "}" ;
+        */
+
+        Notification notificationObject = new Notification.Builder(null).title(title)
+        																.body(message)
+        																.sound("icq.caf")
+        																.build();
+
+        Message gcmMessage = new Message.Builder().notification(notificationObject)
+        										  .contentAvailable(true)
+        										  .priority(Priority.HIGH)
+        										  .build();
+
         MulticastResult result = null;
         try {
             result = sender.send(gcmMessage, devices, 5);
